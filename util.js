@@ -18,6 +18,10 @@ var getUrlArgs=function(){
 /**
  * @module  cookie 
  * @description 获取url参数
+ * 例子：
+ *cookie.get("name");
+ *cookie.set("name","minghuang",new Date("May 1,2017"), "/", "58.com")
+ *cookie.unset("name","minghuang",new Date("May 1,2017"), "/", "58.com")
  */
 
  var cookie={
@@ -55,11 +59,56 @@ var getUrlArgs=function(){
  	}
  };
 
- /*例子：
- cookie.get("name");
- cookie.set("name","minghuang",new Date("May 1,2017"), "/", "58.com")
- cookie.unset("name","minghuang",new Date("May 1,2017"), "/", "58.com")
+/**
+ * @module  browserInfo 
+ * @description 获取浏览器UA标识
  */
+
+var browserInfo = (function() {
+        var regExp = {
+            weixin: /micromessenger\//ig,
+            momo: /momowebview\//ig,
+            qq: /mqqbrowser\/|\sqq\//ig,
+            baidu: /baidu/ig,
+            uc: /ucbrowser/ig,
+            xiaomi: /xiaomi\//ig,
+            firefox: /firefox/ig,
+            opera: /opr\/|opera/ig,
+            sogou: /sogoumobilebrowser/ig,
+            liebao: /liebao/ig,
+            oppo: /oppobrowser/ig,
+            360: /360 aphone browser/ig,
+            //判断完其他的内容后再判断是否为safari
+            safari: /version\/([0-9]+\.\d[\.\d]*)\s+mobile\/\w+\s+safari\/([0-9]+\.\d[\.\d]*)/ig,
+            chrome: /chrome\/([0-9]+\.\d[\.\d]*)+\s+mobile\s+safari\/([0-9]+\.\d[\.\d]*)$|crios/ig
+        };
+        var source = "other";
+        for (var key in regExp) {
+            if (regExp[key].test(navigator.userAgent.toLowerCase())) {
+                source = key;
+                break;
+            }
+        }
+        return source;
+    })() 
+/**
+ * @module diffDeviceInfo
+ * @description 返回系统平台及ios版本
+*/
+var deviceInfo = (function() {
+     var isAndroid = ua.match(/(android);?[\s\/]+([\d.]+)?/),
+         isIOS = ua.match(/(iphone\sos)\s([\d_]+)/);
+    if (isIOS) {
+        var versions = /[\S\s]*os ([\d_]+) like/ig.exec(ua);
+        // iOS 版本
+        var iOSMajorVersion = parseInt(versions[1], 10);
+    }
+    return {
+        "isAndroid": isAndroid||"",
+        "isIOS": isIOS||"",
+        "iosVersion": iOSMajorVersion||""
+    };
+})();
 
 /**
  * @module  getElementsByClassName
@@ -168,19 +217,35 @@ var extend = function(parent, child){
 	return child;
 };
 
-var jsonp = function() {
-    var url = "http://192.168.120.104:8080/searchsuggest_14.do?inputbox=7&cityid=1&catid=0";
-    var callback = "callback" + Math.random().toString().substring(2, 6);
-    window[callback] = function(data) {
-            console.log(data.w[0].k)
+/**
+ * @module  jsonp  
+ * @description jsonp函数封装，需接口支持jsonp方式。
+ * jsonp原理：其实就是定义一个全局函数(callback)，动态创建一个script标签
+ * 标签的src返回的就是一个callback(data),直接执行了js，利用js来进行跨域执行。
+ * 使用例子：
+ *  jsonp("http://suggest.58.com/searchsuggest_14.do?inputbox=7&cityid=1&catid=0",
+ *  function(data){
+ *     console.log(data)
+ * })
+ */ 
+
+var jsonp = function(url, callback) {
+    if (!url) return ;
+    //动态命名，区分每次请求
+    var callbackName = "callback" + Math.random().toString().substring(2, 6);
+    window[callbackName] = function(data) {
+         try {
+              callback && callback(data)
+            }catch (e){
+                console.log("error!!");
+                return 
+            }
         }
-        //window[callback],就是把动态变化的callback名（字符串）挂载到了window下，与直接命名
-        //无区别，但是window[变量]中可以存放一个变量，这是"."运算无法做到的。
-    url += "&callback=" + callback;
-    var script = document.createElement('script');
-    script.setAttribute("type", "text/javascript");
-    script.src = url;
-    document.body.appendChild(script);
+        url += "&callback=" + callbackName;
+        var script = document.createElement('script');
+        script.setAttribute("type", "text/javascript");
+        script.src = url;
+        document.body.appendChild(script);
 };
 
 
@@ -196,6 +261,18 @@ var jsonp = function() {
    **contentType: HTTP头信息，默认值：'application/x-www-form-urlencoded';
    **success: 请求成功后的回调函数;
    **error:   请求失败后的回调函数;
+*  使用例子
+*  ajax({
+*        method: "GET",
+*       url: "/ipservice/",
+*       data: '222',
+*       cache: false,
+*       sucess: function(data) {
+*           //数据默认为字符串形式
+*           console.log(JSON.parse(data).localname)
+*       },
+*       error: function(err) {console.log(err)}
+*   });
  */
 /*
 **ajax工作步骤
