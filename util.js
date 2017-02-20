@@ -96,7 +96,8 @@ var browserInfo = (function() {
  * @description 返回系统平台及ios版本
 */
 var deviceInfo = (function() {
-     var isAndroid = ua.match(/(android);?[\s\/]+([\d.]+)?/),
+     var ua=navigator.userAgent.toLowerCase(),
+         isAndroid = ua.match(/(android);?[\s\/]+([\d.]+)?/),
          isIOS = ua.match(/(iphone\sos)\s([\d_]+)/);
     if (isIOS) {
         var versions = /[\S\s]*os ([\d_]+) like/ig.exec(ua);
@@ -113,6 +114,9 @@ var deviceInfo = (function() {
 /**
  * @module  getElementsByClassName
  * @description 获取class名称集合
+ * @parameter: 
+ * className:类名，string
+ * parentNode: 父节点，document等
  */
 var getElementsByClassName=function(className, parentNode){
 	   if(parentNode.getElementsByClassName(className)){
@@ -135,6 +139,7 @@ var getElementsByClassName=function(className, parentNode){
 /**
  * @module  isArray
  * @description ES5 新增了Array.isArray()方法，兼容处理
+ * @parameter: 要判断的对象
  */
 var isArray=function(value){
     return Object.prototype.toString.call(value) == "[object Array]";
@@ -143,6 +148,7 @@ var isArray=function(value){
 /**
  * @module  isRegExp
  * @description 是否是正则表达式
+ * @parameter: 要判断的对象
  */
 var isRegExp=function (value){
  return Object.prototype.toString.call(value) == "[object RegExp]";
@@ -159,6 +165,7 @@ return Object.prototype.toString.call(value) == "[object Function]";
 /**
  * @module  isEmptyObject 
  * @description 判断是否为空对象
+ * @parameter: 要判断的对象
  */ 
 var isEmptyObject=function(obj){
     for(var name in obj){
@@ -170,6 +177,7 @@ var isEmptyObject=function(obj){
 /**
  * @module  indexOf 
  * @description 重写原生方法，兼容IE8/7
+ * @parameter: 要查找的内容
  */
 Array.prototype._indexOf = function(n) {
     if ("indexOf" in this) {
@@ -220,6 +228,10 @@ var extend = function(parent, child){
 /**
  * @module  jsonp  
  * @description jsonp函数封装，需接口支持jsonp方式。
+ * @parameter: 
+ * url: 接口url地址
+ * callback:回调函数
+ * 
  * jsonp原理：其实就是定义一个全局函数(callback)，动态创建一个script标签
  * 标签的src返回的就是一个callback(data),直接执行了js，利用js来进行跨域执行。
  * 使用例子：
@@ -252,7 +264,7 @@ var jsonp = function(url, callback) {
 /**
  * @module  ajax 
  * @description ajax原生js封装
-   *参数说明:
+ * @parameter:参数说明:
    **method: 请求方式:GET/POST,默认值:'GET';
    **url:    发送请求的地址, 默认值: 当前页地址;
    **data:   string,json;
@@ -357,4 +369,199 @@ var ajax = function(opts) {
             }
 };
 
+/**
+ * @module perLoadImage
+ * @description 图片预加载，依赖isArray方法
+ * @parameter:
+ * arr：图片url组成的数组, array
+ * callback: 图片加载完毕后的回调函数，形参为传入的arr数组
+ */
 
+var perLoadImage=function(arr,callback){
+   
+   var imageObjArr=[],hasloadImageLen=0;
+   var __arr=isArray(arr)? arr:[arr],
+       __callback=callback || function(){};
+   for (var i=0,len=__arr.length;i<len;i++){
+        imageObjArr[i]=new Image();
+        imageObjArr[i].src=__arr[i];
+        imageObjArr[i].onload=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+        imageObjArr[i].onerror=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+   }
+}
+
+/**
+ * @module getElementTop
+ * @description 获取元素在页面上的左边偏移量
+ */
+function getElementLeft(element) {
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent;
+    while (current !== null) {
+        actualLeft += current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+}
+
+/**
+ * @module getElementTop
+ * @description 获取元素在页面上的顶部偏移量
+ */
+function getElementTop(element) {
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent;
+    while (current !== null) {
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+}
+/**
+ * @module getViewport
+ * @description 获取元素及其内边距占据的空间大小
+ *             document.body：IE7及以前版本
+ *             document.documentElement：现代浏览器
+ */
+function getViewport() {
+    if (document.compatMode == "BackCompat") {
+        return {
+            width: document.body.clientWidth,
+            height: document.body.clientHeight
+        };
+    } else {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight
+        };
+    }
+}
+
+
+/**
+ * @module lazyLoadImage
+ * @description 图片懒加载
+ * @parameter:
+ */
+
+var lazyLoadImage=function(opts){
+    var defaults = {
+            target: "img", //懒加载对象
+            event: "scrollStop", //默认事件
+            directX: false, //是否判断x方向
+            effect: "show", //展示效果
+            container: window, //懒加载对象的容器
+            data_attribute: "src", //默认图片标签地址data-src
+            appear: null, //图片加载之前调用事件
+            load: null, //图片加载之后调用事件
+            placeholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"
+        };
+   /*for(var i=0, len=imgNode.length; i<len; i++){
+      imageObjArr[i]=i
+   }*/
+   var showImage=function(){
+       var scrollTop=document.documentElement.
+   }
+}
+/**
+ * @module loadJS
+ * @description 加载外部js文件
+ * @parameter:
+ */
+  
+/**补充：
+ * Document 的 readyState 属性有两个可能的值：
+ * loading，正在加载文档；
+ * complete，已经加载完文档
+ */
+var loadJS=function (url, callback) {
+
+    var script = document.createElement('script');
+    var onload=function(){
+      var readyState = script.readyState;//针对IE
+      console.log(readyState);
+      if (typeof readyState == 'undefined' || /^(loaded|complete)$/.test(readyState)) {
+        script.onload = null;
+        script.onreadystatechange = null;
+        script = null;
+        callback && callback();
+      }
+    };
+    script.async = true;//异步加载
+    script.src = url;
+    if (script.readyState) {
+      script.onreadystatechange = onload;
+    } else {
+      script.onload = onload;
+    }
+    
+    var parent = document.getElementsByTagName('head')[0] || document.body;
+    parent.appendChild(script) && (parent = null);
+  }
+
+/**
+ * @module 事件处理对象
+ * @description 绑定事件和解绑事件，兼容性处理
+ * @parameter:
+ * element: html元素
+ * type: 事件类型
+ * handler:绑定的事件，绑定跟解绑必须是外部定义的事件，因为如果
+ *         参数中直接定义的，每次定义都会开辟一个新内存(即使一模一样)
+ */
+var EventUtil={
+    //绑定事件
+    addHandler:function(element, type, handler){
+      if(element.addEventListener){
+        //冒泡阶段处理事件
+        element.addEventListener(type, handler, false)
+      }else if(element.attachEvent){
+        //IE只有冒泡
+        element.attachEvent("on"+type, handler)
+      }else {
+        element["on"+type]=handler;
+      }
+    },
+    //解绑事件
+    removeHandler:function(element, type, handler){
+       if(element.removeEventListener){
+          element.removeEventListener(type, handler, false)
+       }else if(element.detachEvent){
+          element.detachEvent("on"+type, handler)
+       }else {
+         element["on"+type]=null;
+       }
+    },
+    //获取事件对象
+    getEvent: function(e){
+        //window.event:IE/Chrome,实际测试发现IE跟chrome也支持参数获取
+        //event：作为参数，FF;
+        return e ? e: window.event;
+    },
+    //阻止冒泡
+    stopPropagation:function(e){
+        if(e.stopPropagation){
+            e.stopPropagation();
+        }else{
+            e.cancelBubble=true;
+        }
+    },
+    //获取目标元素
+    getTarget:function(e){
+        return event.target || event.srcElement;
+    },
+    //阻止默认事件
+    preventDefault:function(e){
+        if(e.preventDefault){
+            e.preventDefault();
+        }else{
+            event.returnValue=false;
+        }
+    }
+
+}
