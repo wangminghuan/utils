@@ -414,32 +414,6 @@ var loadJS=function (url, callback) {
 
 /*****************DOM相关方法封装集合**************************/
 
-/**
- * @module perLoadImage
- * @description 图片预加载，依赖isArray方法
- * @parameter:
- * arr：图片url组成的数组, array
- * callback: 图片加载完毕后的回调函数，形参为传入的arr数组
- */
-
-var perLoadImage=function(arr,callback){
-   
-   var imageObjArr=[],hasloadImageLen=0;
-   var __arr=isArray(arr)? arr:[arr],
-       __callback=callback || function(){};
-   for (var i=0,len=__arr.length;i<len;i++){
-        imageObjArr[i]=new Image();
-        imageObjArr[i].src=__arr[i];
-        imageObjArr[i].onload=function(){
-           hasloadImageLen++;
-           hasloadImageLen == arr.length && __callback(__arr)
-        }
-        imageObjArr[i].onerror=function(){
-           hasloadImageLen++;
-           hasloadImageLen == arr.length && __callback(__arr)
-        }
-   }
-}
 
 /**
  * @module getElementTop
@@ -560,29 +534,75 @@ var getBoundingClientRect=function (element) {
 };
 
 /**
+ * @module perLoadImage
+ * @description 图片预加载，依赖isArray方法
+ * @parameter:
+ * arr：图片url组成的数组, array
+ * callback: 图片加载完毕后的回调函数，形参为传入的arr数组
+ */
+
+var perLoadImage=function(arr,callback){
+   
+   var imageObjArr=[],hasloadImageLen=0;
+   var __arr=isArray(arr)? arr:[arr],
+       __callback=callback || function(){};
+   for (var i=0,len=__arr.length;i<len;i++){
+        imageObjArr[i]=new Image();
+        imageObjArr[i].src=__arr[i];
+        imageObjArr[i].onload=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+        imageObjArr[i].onerror=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+   }
+};
+
+
+/**
  * @module lazyLoadImage
  * @description 图片懒加载
- * @parameter:
  */
 
 var lazyLoadImage=function(opts){
     var defaults = {
             target: "img", //懒加载对象
-            event: "scrollStop", //默认事件
-            directX: false, //是否判断x方向
-            effect: "show", //展示效果
-            container: window, //懒加载对象的容器
-            data_attribute: "src", //默认图片标签地址data-src
-            appear: null, //图片加载之前调用事件
-            load: null, //图片加载之后调用事件
-            placeholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"
+            container: document, //懒加载对象的容器
+            data_attribute: "data-src", //默认图片标签地址data-src
+            //placeholder: "http://img.58cdn.com.cn/n/images/list/noimg2.gif"
         };
-   /*for(var i=0, len=imgNode.length; i<len; i++){
-      imageObjArr[i]=i
-   }*/
-   var showImage=function(){
-       var scrollTop=0
-   }
+    for(var k in opts){
+    	defaults[k]=opts[k]
+    }
+    var oImg=defaults.container.getElementsByTagName(defaults.target);
+    var imgArr=[],len=oImg.length;
+    for(var j=0;j<len;j++){
+    	imgArr[j]=j
+    }
+    showImage();
+    window.onscroll=showImage;
+    function isInViewport(ele){
+	     var scrollTop=document.documentElement.scrollTop||document.body.scrollTop,
+	         eleTop=getElementTop(ele) + ele.clientHeight,
+	         winTop=scrollTop + document.documentElement.clientHeight;
+	      //当 scrollTop <= eleTop <= winTop, 认为元素在窗口内
+	     return winTop>=eleTop && eleTop>=scrollTop? true:false
+    }
+    function showImage(){
+	     if(imgArr.length<1) return
+	      for(var i=0;i<len;i++){
+	        if(isInViewport(oImg[imgArr[i]])){
+	          oImg[imgArr[i]].src=oImg[imgArr[i]].getAttribute(defaults.data_attribute);
+	          oImg[imgArr[i]].removeAttribute(defaults.data_attribute);
+	          imgArr.splice(i,1);
+	          i--
+	          len--;
+	        }
+	      }
+	    
+    }
 };
 
 /**
@@ -644,4 +664,4 @@ var EventUtil={
         }
     }
 
-}
+};
