@@ -1,4 +1,11 @@
 /**
+ * @author: 王明欢 
+ * @date:2017-02-21
+ */
+
+/*****************ECMAScript相关方法封装集合**************************/
+
+/**
  * @module 
  * @description 获取url参数
  */
@@ -24,7 +31,7 @@ var getUrlArgs=function(){
  *cookie.unset("name","minghuang",new Date("May 1,2017"), "/", "58.com")
  */
 
- var cookie={
+var cookie={
  	get:function(name){
  		var cookieName=encodeURIComponent(name)+"=",
  		    cookieStart=document.cookie.indexOf(cookieName),
@@ -368,107 +375,6 @@ var ajax = function(opts) {
                 }
             }
 };
-
-/**
- * @module perLoadImage
- * @description 图片预加载，依赖isArray方法
- * @parameter:
- * arr：图片url组成的数组, array
- * callback: 图片加载完毕后的回调函数，形参为传入的arr数组
- */
-
-var perLoadImage=function(arr,callback){
-   
-   var imageObjArr=[],hasloadImageLen=0;
-   var __arr=isArray(arr)? arr:[arr],
-       __callback=callback || function(){};
-   for (var i=0,len=__arr.length;i<len;i++){
-        imageObjArr[i]=new Image();
-        imageObjArr[i].src=__arr[i];
-        imageObjArr[i].onload=function(){
-           hasloadImageLen++;
-           hasloadImageLen == arr.length && __callback(__arr)
-        }
-        imageObjArr[i].onerror=function(){
-           hasloadImageLen++;
-           hasloadImageLen == arr.length && __callback(__arr)
-        }
-   }
-}
-
-/**
- * @module getElementTop
- * @description 获取元素在页面上的左边偏移量
- */
-function getElementLeft(element) {
-    var actualLeft = element.offsetLeft;
-    var current = element.offsetParent;
-    while (current !== null) {
-        actualLeft += current.offsetLeft;
-        current = current.offsetParent;
-    }
-    return actualLeft;
-}
-
-/**
- * @module getElementTop
- * @description 获取元素在页面上的顶部偏移量
- */
-function getElementTop(element) {
-    var actualTop = element.offsetTop;
-    var current = element.offsetParent;
-    while (current !== null) {
-        actualTop += current.offsetTop;
-        current = current.offsetParent;
-    }
-    return actualTop;
-}
-/**
- * @module getViewport
- * @description 获取元素及其内边距占据的空间大小
- *             document.body：IE7及以前版本
- *             document.documentElement：现代浏览器
- */
-function getViewport() {
-    if (document.compatMode == "BackCompat") {
-        return {
-            width: document.body.clientWidth,
-            height: document.body.clientHeight
-        };
-    } else {
-        return {
-            width: document.documentElement.clientWidth,
-            height: document.documentElement.clientHeight
-        };
-    }
-}
-
-
-/**
- * @module lazyLoadImage
- * @description 图片懒加载
- * @parameter:
- */
-
-var lazyLoadImage=function(opts){
-    var defaults = {
-            target: "img", //懒加载对象
-            event: "scrollStop", //默认事件
-            directX: false, //是否判断x方向
-            effect: "show", //展示效果
-            container: window, //懒加载对象的容器
-            data_attribute: "src", //默认图片标签地址data-src
-            appear: null, //图片加载之前调用事件
-            load: null, //图片加载之后调用事件
-            placeholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"
-        };
-   /*for(var i=0, len=imgNode.length; i<len; i++){
-      imageObjArr[i]=i
-   }*/
-   var showImage=function(){
-       var scrollTop=document.documentElement.
-   }
-}
 /**
  * @module loadJS
  * @description 加载外部js文件
@@ -503,7 +409,181 @@ var loadJS=function (url, callback) {
     
     var parent = document.getElementsByTagName('head')[0] || document.body;
     parent.appendChild(script) && (parent = null);
+  };
+
+
+/*****************DOM相关方法封装集合**************************/
+
+/**
+ * @module perLoadImage
+ * @description 图片预加载，依赖isArray方法
+ * @parameter:
+ * arr：图片url组成的数组, array
+ * callback: 图片加载完毕后的回调函数，形参为传入的arr数组
+ */
+
+var perLoadImage=function(arr,callback){
+   
+   var imageObjArr=[],hasloadImageLen=0;
+   var __arr=isArray(arr)? arr:[arr],
+       __callback=callback || function(){};
+   for (var i=0,len=__arr.length;i<len;i++){
+        imageObjArr[i]=new Image();
+        imageObjArr[i].src=__arr[i];
+        imageObjArr[i].onload=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+        imageObjArr[i].onerror=function(){
+           hasloadImageLen++;
+           hasloadImageLen == arr.length && __callback(__arr)
+        }
+   }
+}
+
+/**
+ * @module getElementTop
+ * @description 获取元素在页面上的左边偏移量
+ * offsetLeft：元素的左外边框至包含元素的左内边框之间的像素距离。
+ * 通过循环累加元素父级(到body)，得到最终的相对页面的偏移量
+ */
+var getElementLeft=function (element) {
+    var actualLeft = element.offsetLeft;
+    var current = element.offsetParent;
+    while (current !== null) {//body.offsetParent=null
+        actualLeft += current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+};
+
+/**
+ * @module getElementTop
+ * @description 获取元素在页面上的顶部偏移量
+ */
+var getElementTop=function (element) {
+    var actualTop = element.offsetTop;
+    var current = element.offsetParent;
+    while (current !== null) {
+        actualTop += current.offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+};
+/**
+ * @module getViewport
+ * @description 获取viewport及其内边距占据的空间大小(不包含margin,border)
+ *             document.body：混杂模式
+ *             document.documentElement：现代浏览器
+ */
+var getViewport=function () {
+    //判断是否在混杂模式
+    if (document.compatMode == "BackCompat") {
+        return {
+            width: document.body.clientWidth,
+            height: document.body.clientHeight
+        };
+    } else {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight
+        };
+    }
+};
+/**
+ * @module getDoc
+ * @description 获得页面高度和宽度
+ */
+var getDoc=function(){
+  if (document.compatMode == "BackCompat"){
+       return {
+        width:Math.max(document.documentElement.scrollWidth,document.documentElement.clientWidth),
+        height:Math.max(document.documentElement.scrollHeight,document.documentElement.clientHeight)
+       }
+  }else{
+     return {
+        width:Math.max(document.body.scrollWidth,document.body.clientWidth),
+        height:Math.max(document.body.scrollHeight,document.body.clientHeight)
+       }
   }
+};
+
+/**
+ * @module scrollToTop
+ * @description 将页面返回顶部
+ */
+var scrollToTop=function (){
+if (document.body.scrollTop != 0){
+    document.body.scrollTop = 0;
+  }
+};
+
+/**
+ * @module getBoundingClientRect
+ * @description 获取元素在页面中相对于视口的位置
+ * 依赖getElementLeft和getElementTop方法
+ */
+var getBoundingClientRect=function (element) {
+    var scrollTop = document.documentElement.scrollTop;
+    var scrollLeft = document.documentElement.scrollLeft;
+    //支持原生方法getBoundingClientRect的情况下
+    if (element.getBoundingClientRect) {
+        if (typeof arguments.callee.offset != "number") {
+            var temp = document.createElement("div");
+            temp.style.cssText = "position:absolute;left:0;top:0;";
+            document.body.appendChild(temp);
+            arguments.callee.offset = -temp.getBoundingClientRect().top - scrollTop;
+            document.body.removeChild(temp);
+            temp = null;
+        }
+        var rect = element.getBoundingClientRect();
+        var offset = arguments.callee.offset;
+        //IE7及以下起始坐标点是(2,2)，首先将得到的坐标存在offset属性下
+        //第二次调用减去这个属性中的坐标即可得到纠正(原点坐标的一直都是0)。
+        return {
+            left: rect.left + offset,
+            right: rect.right + offset,
+            top: rect.top + offset,
+            bottom: rect.bottom + offset
+        };
+    } else {
+      //不支持原生方法的话，通过计算得到
+        var actualLeft = getElementLeft(element);
+        var actualTop = getElementTop(element);
+        return {
+            left: actualLeft - scrollLeft,
+            right: actualLeft + element.offsetWidth - scrollLeft,
+            top: actualTop - scrollTop,
+            bottom: actualTop + element.offsetHeight - scrollTop
+        }
+    }
+};
+
+/**
+ * @module lazyLoadImage
+ * @description 图片懒加载
+ * @parameter:
+ */
+
+var lazyLoadImage=function(opts){
+    var defaults = {
+            target: "img", //懒加载对象
+            event: "scrollStop", //默认事件
+            directX: false, //是否判断x方向
+            effect: "show", //展示效果
+            container: window, //懒加载对象的容器
+            data_attribute: "src", //默认图片标签地址data-src
+            appear: null, //图片加载之前调用事件
+            load: null, //图片加载之后调用事件
+            placeholder: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"
+        };
+   /*for(var i=0, len=imgNode.length; i<len; i++){
+      imageObjArr[i]=i
+   }*/
+   var showImage=function(){
+       var scrollTop=0
+   }
+};
 
 /**
  * @module 事件处理对象
