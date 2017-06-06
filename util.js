@@ -265,7 +265,7 @@ function jsonp(url, callback) {
  *       url: "/ipservice/",
  *       data: '222',
  *       cache: false,
- *       sucess: function(data) {
+ *       success: function(data) {
  *           //数据默认为字符串形式
  *           console.log(JSON.parse(data).localname)
  *       },
@@ -287,7 +287,7 @@ function ajax(opts) {
         async: true,
         cache: true,
         contentType: 'application/x-www-form-urlencoded',
-        sucess: function() {},
+        success: function() {},
         error: function() {}
     };
     for (var key in opts) {
@@ -347,7 +347,7 @@ function ajax(opts) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-                defaults.sucess(xhr.responseText)
+                defaults.success(xhr.responseText)
             } else {
                 defaults.error(xhr.status)
             }
