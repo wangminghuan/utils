@@ -123,6 +123,44 @@ var deviceInfo = (function() {
 
 
 /**
+ * @module  getRandomWithBoth
+ * @description 返回[min,max]之前的数值，包含两端：min ≤ num ≤ max
+ * @parameter: 最小值与最大值, 均为整数，含负数
+ */
+function getRandomWithBoth(min, max) {
+    return min + Math.round(Math.random()*(max-min));
+}
+
+
+function getRandomWithMin(min, max) {
+    return min + Math.floor(Math.random()*(max-min));
+}
+
+function getRandomWithMax(min, max) {
+    var Range = Max - Min;
+      var Rand = Math.random();
+      if(Math.round(Rand * Range)==0){       
+        return Min + 1;
+      }
+      var num = Min + Math.round(Rand * Range);
+      return num;
+}
+
+function getRandomWithNone(min, max) {
+     var Range = Max - Min;
+      var Rand = Math.random();
+      if(Math.round(Rand * Range)==0){
+        return Min + 1;
+      }else if(Math.round(Rand * Max)==Max)
+      {
+        index++;
+        return Max - 1;
+      }else{
+        var num = Min + Math.round(Rand * Range) - 1;
+        return num;
+      }
+}
+/**
  * @module  isArray
  * @description ES5 新增了Array.isArray()方法，兼容处理
  * @parameter: 要判断的对象
@@ -130,6 +168,7 @@ var deviceInfo = (function() {
 function isArray(value) {
     return Object.prototype.toString.call(value) == "[object Array]";
 }
+
 
 /**
  * @module  isRegExp
