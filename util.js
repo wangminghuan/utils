@@ -307,7 +307,7 @@ function ajax(opts) {
 
     //处理用户输入的data数据
 
-    if (typeof defaults.data == 'object' && !Object.prototype.toString.call(defaults.data) == "[object Array]") {
+    if (typeof defaults.data == 'object' && Object.prototype.toString.call(defaults.data) != "[object Array]") {
         var dataStr = "";
         for (var k in defaults.data) {
             dataStr += encodeURIComponent(k) + "=" + encodeURIComponent(defaults.data[k]) + "&"
@@ -358,7 +358,7 @@ function ajax(opts) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-                defaults.success(xhr.responseText)
+                defaults.success(JSON.parse(JSON.stringify(xhr.responseText)))
             } else {
                 defaults.error(xhr.status)
             }
