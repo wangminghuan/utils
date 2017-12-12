@@ -682,4 +682,29 @@ var EventUtil = {
         }
     }
 
+};
+/**
+ * @module toast提示UI组件
+ * @description 
+ * @parameter:
+ * msg: string，需要提示的文本
+ */
+function showToast(msg){
+    var $target=$(".__toast-wrap__");
+    if(!($target) || $target.length==0){
+      var style = document.createElement('style');
+      var _inner='.__toast-wrap__{opacity: 0;position: fixed;bottom: 20%;color: #fff;width: 100%;text-align: center}';
+      _inner+='.__toast-wrap__ span{background-color: rgba(0,0,0,0.7);padding: 2px 10px;font-size: 14px;border-radius: 5px}';
+      _inner+='.__toast-animate__{animation: __toastKF__ 2s}@keyframes __toastKF__{0% {opacity: 0;}25% {opacity: 1; z-index: 9999}50% {opacity: 1; z-index: 9999}75% {opacity: 1; z-index: 9999}100% {opacity: 0; z-index: 0}}';
+      style.type = 'text/css';
+      style.innerHTML=_inner;
+      $("head").append(style);
+      $("body").append('<div class="__toast-wrap__"><span>'+msg+'</span></div>');
+      $target=$(".__toast-wrap__");
+    }
+    $target.children("span").html(msg);
+    $target.removeClass("__toast-animate__")
+    setTimeout(function(){
+          $target.addClass("__toast-animate__")
+    }, 100);
 }
